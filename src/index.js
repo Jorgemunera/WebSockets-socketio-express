@@ -43,6 +43,19 @@ io.on('connection', (socket) => {
         io.to(lastSocket).emit("salute", data)
     })
 
+    // emitir desde el server y ver diferencia entre on, once, off
+    socket.emit("on", "emito on")
+    socket.emit("on", "emito on")
+
+    socket.emit("once", "emito once")
+    socket.emit("once", "emito once")
+
+    // evento que quiero apagar
+    socket.emit("evento-to-off", "emito off")
+    setTimeout(() => {
+        socket.emit("evento-to-off", "emito off")
+        console.log("pasan 3 sg");
+    }, 3000)
 })
 
 server.listen(3000, () => {
