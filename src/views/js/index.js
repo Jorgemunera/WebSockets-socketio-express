@@ -17,3 +17,14 @@ emitToServer.addEventListener("click", () => {
 socket.on("everyone", data => {
     console.log("evento emitido a todos los clientes desde el server: ", data)
 })
+
+// vamos a emitir el evento cuando se presione el boton
+const emitToLast = document.querySelector("#emit-to-last");
+emitToLast.addEventListener("click", () => {
+    socket.emit("toLast", "hola papito estas retrasado ⏳ (emitido desde el cliente)")
+})
+
+// vamos a escuchar el evento de saludo que se va a enviar al ultimo cliente conectado
+socket.on("salute", data => {
+    console.log("data que se va a enviar al ultimo cliente conectado, recibido desde el server: ", data)
+})

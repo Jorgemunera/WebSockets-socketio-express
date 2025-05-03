@@ -13,26 +13,35 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'views')));
 
+// creamos un arreglo para almacenar los sockets conectados
+const socketsOnline = [];
+
 // router
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
 });
 
 io.on('connection', (socket) => {
-    // emision basica
-    // nosotros vamos a poner al server a emitir el primer evento
-    // lo que va a suceder es que cada vez que alguien se conecte el server de web socket va a detectarlo y va a emitir un evento "welcome" con el valo "ahora estas conectado"
-    // esto lo emite el servidor hacia el liente 
+
+    // cuando se conecta un cliente entonces vamos a guardar en el array la informacion del id del socket que se conecta
+    socketsOnline.push(socket.id)
+
     socket.emit("welcome", "ahora estas conectado 😊");
 
-    // queremos tambien recibir el evento que emite el cliente
     socket.on("toServer", data => {
         console.log("data recibida del cliente:", data)
     })
 
-    // queremos emitir a todos los clientes
-    // queremos por ejemplo mandar el socket.id de cada nuevo cliente que se conecte
     io.emit("everyone", socket.id + " se ha conectado 🧩")
+
+    // recibir el evento que se va a emitir a uno solo
+    socket.on("toLast", data => {
+        // vamos a obtener el ultimo socket que se conecto
+        const lastSocket = socketsOnline[socketsOnline.length - 1];
+
+        // ya tenemos el id del ultimo socket, entonces ahora le vamos a emitir el saludo solo al ultimo cliente que se conecta
+        io.to(lastSocket).emit("salute", data)
+    })
 
 })
 
