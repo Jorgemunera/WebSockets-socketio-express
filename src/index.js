@@ -4,35 +4,35 @@ const path = require('path');
 const { Server } = require('socket.io');
 
 const app = express();
+
+// server express
 const server = http.createServer(app);
 
-// creamos el server de websocket
-// este es necesario que utilicemos explicitamente el createServer del modulo http
+// server websocket
 const io = new Server(server);
 
-// queremos servir archivos estaticos como css, javascript, etc
-// todos los archivos estaticos van a estar en lo que coloquemos en path.join, aqui se van a guardar
 app.use(express.static(path.join(__dirname, 'views')));
 
-
+// router
 app.get('/', (req, res) => {
-    // queremos responder un archivo html que va a estar en nuestro proyecto
-    // este archivo lo vamos a enviar cada que visitemos la ruta raiz
     res.sendFile(__dirname + '/views/index.html')
 });
 
-// ahora vamos a escuchar las peticiones con websocket
 io.on('connection', (socket) => {
-    // cada vez que se conecte un nuevo cliente me va a ejecutar la funcion
-    console.log('clientes conectados: ', io.engine.clientsCount);
-    console.log('ID socket conectado: ', socket.id);
-    socket.on('disconnect', () => {
-        console.log(`socket id : ${socket.id} desconectado`)
+    // emision basica
+    // nosotros vamos a poner al server a emitir el primer evento
+    // lo que va a suceder es que cada vez que alguien se conecte el server de web socket va a detectarlo y va a emitir un evento "welcome" con el valo "ahora estas conectado"
+    // esto lo emite el servidor hacia el liente 
+    socket.emit("welcome", "ahora estas conectado 😊");
+
+    // queremos tambien recibir el evento que emite el cliente
+    socket.on("toServer", data => {
+        console.log("data recibida del cliente:", data)
     })
 
-    socket.conn.once('upgrade', () => {
-        console.log(`Hemos pasado de HTTP LONG-POLLING a : ${socket.conn.transport.name}`)
-    })
+    // queremos emitir a todos los clientes
+    // queremos por ejemplo mandar el socket.id de cada nuevo cliente que se conecte
+    io.emit("everyone", socket.id + " se ha conectado 🧩")
 
 })
 

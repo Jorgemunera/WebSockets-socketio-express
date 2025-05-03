@@ -1,30 +1,19 @@
 const socket = io();
 
-function checkSocketStatus() {
-    console.log("socket status: ", socket.connected)
-}
-
-socket.on('connect', () => {
-    console.log(`DESDE EL CLIENTE: el socket ${socket.id} se ha conectado 😊`)
-    checkSocketStatus();
+// el cliente deberia poder recibir esa emision
+socket.on("welcome", data => {
+    console.log("data: ", data)
+    const text = document.querySelector("#text");
+    text.textContent = data
 })
 
-socket.on('connect_error', () => {
-    console.log(`DESDE EL CLIENTE: No pude conectarme 🤷🏻‍♀️`)
-    checkSocketStatus();
+const emitToServer = document.querySelector("#emit-to-server")
+emitToServer.addEventListener("click", () => {
+    // quiero que cuando se de click al boton entonces se emita un evento al server
+    socket.emit("toServer", "hola servidor soy yo emitiendo desde el cliente 👋🏻")
 })
 
-socket.on('disconnect', () => {
-    console.log(`DESDE EL CLIENTE: el socket ${socket.id} se ha desconectado 😔`)
-    checkSocketStatus();
-})
-
-socket.io.on('reconnect_attempt', () => {
-    console.log(`DESDE EL CLIENTE: el socket ${socket.id} está intentando reconectarse 🚀`)
-
-})
-
-socket.io.on('reconnect', () => {
-    console.log(`DESDE EL CLIENTE: Me logré reconectar YEAAAA`)
-
+// vamos a recibir el evento que se evia a todos los clientes
+socket.on("everyone", data => {
+    console.log("evento emitido a todos los clientes desde el server: ", data)
 })

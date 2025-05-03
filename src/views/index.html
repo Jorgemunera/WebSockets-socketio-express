@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server con express y socket.io</title>
 </head>
+
 <body>
     <h1>Funciona</h1>
-    <!-- 
-    Para que un archivo html se pueda conectar a un server de socket.io nosotors tenemos que importar la libreria de socket.io
-     y cuando nosotros levantamos un server de socket.io, la libreria de socket.io expone un archivo js que conetiene la logica para poder inportar el codigo en el cliente de socket.io en 
-     /socket.io/socket.io.js
-     -->
-     <script src="/socket.io/socket.io.js"></script>
+    <p id="text"></p>
+    <button id="emit-to-server">Presioname 👀</button>
 
-     <!-- 
-     Y tambien tenemos que meter otro script para que nuestro cliente se pueda conectar por websocket
-     Para aclarar que la funcion io() la esta exponiendo el script de arriba
-     -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/index.js"></script>
 
 </body>
+
 </html>
