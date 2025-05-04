@@ -13,8 +13,6 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'views')));
 
-// creamos un arreglo para almacenar los sockets conectados
-const socketsOnline = [];
 
 // router
 app.get('/', (req, res) => {
@@ -22,40 +20,16 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    // vamos a escuchar e evento cuando me emiten la posicion del circulo
+    socket.on("circle-position", position => {
+        // ahora mi server deberia mandar esto a todos los usuarios onectados o clientes conectados
+        // io.emit("move-circle", position);
 
-    // cuando se conecta un cliente entonces vamos a guardar en el array la informacion del id del socket que se conecta
-    socketsOnline.push(socket.id)
+        // pero en lugar de io.emit como lo tenemos arriba, lo mejor es usar broadcast
+        // broadcast emite el evento a todos menos a el socket especifico (a mi)
+        socket.broadcast.emit("move-circle", position);
 
-    socket.emit("welcome", "ahora estas conectado 😊");
-
-    socket.on("toServer", data => {
-        console.log("data recibida del cliente:", data)
     })
-
-    io.emit("everyone", socket.id + " se ha conectado 🧩")
-
-    // recibir el evento que se va a emitir a uno solo
-    socket.on("toLast", data => {
-        // vamos a obtener el ultimo socket que se conecto
-        const lastSocket = socketsOnline[socketsOnline.length - 1];
-
-        // ya tenemos el id del ultimo socket, entonces ahora le vamos a emitir el saludo solo al ultimo cliente que se conecta
-        io.to(lastSocket).emit("salute", data)
-    })
-
-    // emitir desde el server y ver diferencia entre on, once, off
-    socket.emit("on", "emito on")
-    socket.emit("on", "emito on")
-
-    socket.emit("once", "emito once")
-    socket.emit("once", "emito once")
-
-    // evento que quiero apagar
-    socket.emit("evento-to-off", "emito off")
-    setTimeout(() => {
-        socket.emit("evento-to-off", "emito off")
-        console.log("pasan 3 sg");
-    }, 3000)
 })
 
 server.listen(3000, () => {
