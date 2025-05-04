@@ -1,36 +1,42 @@
 const socket = io();
 
-const drag = e => {
-    const position = {
-        top: e.clientY + "px",
-        left: e.clientX + "px"
-    }
+// selecciono mis botones que me conectaran a las salas
+const connectRoom1 = document.querySelector("#connectRoom1");
+const connectRoom2 = document.querySelector("#connectRoom2");
+const connectRoom3 = document.querySelector("#connectRoom3");
 
-    // y para no depender del servidor primero dibujamos el circulito y luego emitimos el evento con la position
-    drawCircle(position)
-
-    // vamos a emitir la posicion del circulo
-    socket.emit("circle-position", position)
-}
-
-// creamos una funcion drawCircle
-const drawCircle = position => {
-    circle.style.top = position.top;
-    circle.style.left = position.left;
-}
-
-// queremos mover el circle
-const circle = document.querySelector("#circle");
-document.addEventListener("mousedown", e => {
-    document.addEventListener("mousemove", drag)
+// eventos para que al hacer click me conecte a las salas
+connectRoom1.addEventListener("click", (e) => {
+    // conectarnos a la sala que queremos
+    socket.emit("connect-to-room", "room1");
 })
 
-document.addEventListener("mouseup", e => {
-    document.removeEventListener("mousemove", drag)
+connectRoom2.addEventListener("click", (e) => {
+    // conectarnos a la sala que queremos
+    socket.emit("connect-to-room", "room2");
 })
 
-// ahora vamos a escuchar el evento move-circle que va a enviar el servidor a todos los lientes, para que todos los clientes en tiempo real sepan que pasa con la posicion del circulo
-socket.on("move-circle", position => {
-    // llamar ahora a nuestra funcion drawCircle
-    drawCircle(position)
+connectRoom3.addEventListener("click", (e) => {
+    // conectarnos a la sala que queremos
+    socket.emit("connect-to-room", "room3");
+})
+
+// logica para enviar mensaje al undir boton de enviar mensaje
+const sendMessage = document.querySelector("#sendMessage")
+sendMessage.addEventListener("click", () => {
+    const message = prompt("Escribe tu mensaje: ")
+    socket.emit("message", message)
+})
+
+// vamos a recibir el evento emiido por el server del mensaje
+socket.on("send-message", data => {
+    const {room, message} = data;
+
+    // vamos a crear un li por cada mensaje y le ponemos el mensaje correspondiente
+    const li = document.createElement("li");
+    li.textContent = message;
+
+    // vamos a mandar ese elemento li a la sala correspondiente
+    document.querySelector(`#${room.replace("s-", "")}`).append(li)
+
 })
