@@ -1,42 +1,52 @@
-const socket = io();
+// hasta ahora siempre haciamos esto, pero hay que tener en cuenta que cuando hacemos esto socketio asigna al soket al namespace por defecto
+// const socket = io();
 
-// selecciono mis botones que me conectaran a las salas
-const connectRoom1 = document.querySelector("#connectRoom1");
-const connectRoom2 = document.querySelector("#connectRoom2");
-const connectRoom3 = document.querySelector("#connectRoom3");
+// lo que queremos saber primero es si el cliente que se conecta es un profesor o un estudiante
+const user = prompt("Escribe tu usuario");
 
-// eventos para que al hacer click me conecte a las salas
-connectRoom1.addEventListener("click", (e) => {
-    // conectarnos a la sala que queremos
-    socket.emit("connect-to-room", "room1");
+// nuestros profesores
+const profes = ["RetazMaster", "juandc", "DNDX"];
+
+let soketNamespace, group;
+
+// seleccionamos los elementos, caja de chat y el span
+const chat = document.querySelector("#chat");
+const namespace = document.querySelector("#namespace");
+
+
+if(profes.includes(user)){
+    // es un profesor
+    // aqui ya no estamos asignando al socket al namespace por defecto sino al que nosotros le indicamos
+    soketNamespace = io("/teachers");
+    group = "teachers"
+} else {
+    // y a ls estudiantes los mtemos al namespace diferente
+    soketNamespace = io("/students");
+    group = "students"
+}
+
+// cuando escuchemos que el socket se conecta, entonces vamos a poner en el html del span el grupo correspondiente
+soketNamespace.on("connect", () => {
+    namespace.textContent = group;
 })
 
-connectRoom2.addEventListener("click", (e) => {
-    // conectarnos a la sala que queremos
-    socket.emit("connect-to-room", "room2");
-})
-
-connectRoom3.addEventListener("click", (e) => {
-    // conectarnos a la sala que queremos
-    socket.emit("connect-to-room", "room3");
-})
-
-// logica para enviar mensaje al undir boton de enviar mensaje
-const sendMessage = document.querySelector("#sendMessage")
+// programar logica de enevio de mensajes
+const sendMessage = document.querySelector("#sendMessage");
 sendMessage.addEventListener("click", () => {
-    const message = prompt("Escribe tu mensaje: ")
-    socket.emit("message", message)
+    const message = promt("escribe tu mensaje: ")
+    soketNamespace.emit("send-message", {
+        message,
+        user
+    })
 })
 
-// vamos a recibir el evento emiido por el server del mensaje
-socket.on("send-message", data => {
-    const {room, message} = data;
+// y ahora escuchamos el evento del server de acuerdo al namespace correspondiente
+soketNamespace.on("message", data => {
+    // lo vamos a mandar al html
+    const { user, message} = data;
 
-    // vamos a crear un li por cada mensaje y le ponemos el mensaje correspondiente
     const li = document.createElement("li");
-    li.textContent = message;
+    li.textContent = `${user}: ${message}`
 
-    // vamos a mandar ese elemento li a la sala correspondiente
-    document.querySelector(`#${room.replace("s-", "")}`).append(li)
-
+    chat.append(li)
 })

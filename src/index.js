@@ -18,49 +18,34 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
 });
 
-io.on('connection', (socket) => {
-    // tenemos ue identificar de alguna manera a que sala estamos conectados actualmente
-    // eso lo podemos hacer con socket
-    socket.connectedRoom = "";
+// aqui opasa lo mismo qu en el cliente. ya no vamos a usar directamente este io, porque este hace referencia al namespace default
+// io.on('connection', (socket) => {
+// })
 
-    // escuchamos los eventos
-    socket.on("connect-to-room", room => {
-        // ante de meterlo a una sala tenemos que sacarlo de la ultima donde estaba
-        socket.leave(socket.connectedRoom);
+// creamos 2 namespaces
+const teachers = io.of("teachers")
+const students = io.of("students")
 
-        switch (room) {
-            case "room1":
-                // con join lo vamos a poder unir a una sala a este socket que envia el evento, si la sala no existe la crea
-                socket.join("s-room1");
-                socket.connectedRoom = "s-room1"
-                break;
-            
-            case "room2":
-                socket.join("s-room2");
-                socket.connectedRoom = "s-room2"
-                break;
+// y ahora si, detectamos el evento de conexion por el namespace correspondeinte
+teachers.on("connection", (socket) => {
+    // y aqui escucharemos eventos uncamente del namespace teachers
+    console.log(`socket.id: ${socket.id}, se ha conectado a la sala de profes`);
 
-            case "room3":
-                socket.join("s-room3");
-                socket.connectedRoom = "s-room3"
-                break;
-        
-            default:
-                break;
-        }
+    // vamos a recibir el evento del mensaje del cliente soket correspondiente.
+    // y cundo detectemos el evento de enviar mensaje, al namespace de teacher hay que emitirle el mensaje
+    socket.on("send-message", data => {
+        teachers.emit("message", data)
     })
+    
+})
 
-    // escuchamos el evento del mensaje
-    socket.on("message", message => {
-        // entonces tenemos que saber a que sala esta conectado el socket para saber a cual sala mandar el mensaje
-        const room = socket.connectedRoom;
-        console.log("room al que estoy conectado:", room)
+students.on("connection", (socket) => {
+    // y aqui escucharemos eventos uncamente del namespace students
+    console.log(`socket.id: ${socket.id}, se ha conectado a la sala de estudiantes`);
 
-        //y ahora mandamos el mensaje a la sala correspondiente
-        io.to(room).emit("send-message", {
-            message,
-            room
-        })
+    // y hacemos lo mismo en students
+    socket.on("send-message", data => {
+        students.emit("message", data)
     })
 })
 
