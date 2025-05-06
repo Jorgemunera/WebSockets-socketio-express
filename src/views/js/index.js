@@ -1,52 +1,25 @@
-// hasta ahora siempre haciamos esto, pero hay que tener en cuenta que cuando hacemos esto socketio asigna al soket al namespace por defecto
-// const socket = io();
+const socket = io();
 
-// lo que queremos saber primero es si el cliente que se conecta es un profesor o un estudiante
-const user = prompt("Escribe tu usuario");
+const send = document.querySelector("#send")
+const disconnect = document.querySelector("#disconnect")
+const reconnet = document.querySelector("#reconnet")
 
-// nuestros profesores
-const profes = ["RetazMaster", "juandc", "DNDX"];
+// añadimos eventos
+// recordar que vamos a simular la desconexion y reconexion
+send.addEventListener("click", () => {
 
-let soketNamespace, group;
+    // antes de enviar el evento consultamos si el socket esta conectado
+    if(socket.connected){
+        socket.emit("is-connected", "esta conectado 👍🏻")
+    }
+});
 
-// seleccionamos los elementos, caja de chat y el span
-const chat = document.querySelector("#chat");
-const namespace = document.querySelector("#namespace");
-
-
-if(profes.includes(user)){
-    // es un profesor
-    // aqui ya no estamos asignando al socket al namespace por defecto sino al que nosotros le indicamos
-    soketNamespace = io("/teachers");
-    group = "teachers"
-} else {
-    // y a ls estudiantes los mtemos al namespace diferente
-    soketNamespace = io("/students");
-    group = "students"
-}
-
-// cuando escuchemos que el socket se conecta, entonces vamos a poner en el html del span el grupo correspondiente
-soketNamespace.on("connect", () => {
-    namespace.textContent = group;
+disconnect.addEventListener("click", () => {
+    // estamos simulando una desconexion forzosa para poder ejemplificar este tema
+    socket.disconnect();
 })
 
-// programar logica de enevio de mensajes
-const sendMessage = document.querySelector("#sendMessage");
-sendMessage.addEventListener("click", () => {
-    const message = promt("escribe tu mensaje: ")
-    soketNamespace.emit("send-message", {
-        message,
-        user
-    })
-})
-
-// y ahora escuchamos el evento del server de acuerdo al namespace correspondiente
-soketNamespace.on("message", data => {
-    // lo vamos a mandar al html
-    const { user, message} = data;
-
-    const li = document.createElement("li");
-    li.textContent = `${user}: ${message}`
-
-    chat.append(li)
+disconnect.addEventListener("click", () => {
+    // estamos simulando una reconexion forzosa para poder ejemplificar este tema
+    socket.connect();
 })
