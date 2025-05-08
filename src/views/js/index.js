@@ -9,8 +9,6 @@ const drag = e => {
     drawCircle(position)
 
     console.log("se envia el evento al servidor")
-    //ahora para manejar estos eventos que se quedan en buffer en las desconexiones y evitar que se manden despues todos los eventos al mismo tiempo al servidor ponemos la palabra volatile
-    // entonces si no hay conexion el evento no se va a mandar
     socket.volatile.emit("circle-position", position)
 }
 
