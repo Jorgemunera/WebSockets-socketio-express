@@ -1,8 +1,3 @@
-// leemos la variable DEBUG del entorno 
-// esto debuguea todo
-// process.env.DEBUG = "*";
-
-// esto debugue lo que queremos especifico
 process.env.DEBUG = "engine, socket.io:socket";
 
 const express = require('express');
