@@ -5,16 +5,39 @@ const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
 
+// importamos lo necesario de adminUI
+const { instrument } = require("@socket.io/admin-ui");
+
 const app = express();
 
 // server express
 const server = http.createServer(app);
-
 // server websocket
-const io = new Server(server);
+// y aqui adicionamos otro parametro a nuestro server de socket
+const io = new Server(server, {
+    cors: {
+        origin: ["https://admin.socket.io"],
+        credentials: false
+    }
+});
+
+// usamos el instrument
+// podemos no usar auth
+// instrument(io, {
+//     auth: false
+// })
+
+// y podemos usar authenticacion
+instrument(io, {
+    auth: {
+        type: "basic",
+        username: "usernameCualquiera",
+        password: "pass123"
+
+    }
+})
 
 app.use(express.static(path.join(__dirname, 'views')));
-
 
 // router
 app.get('/', (req, res) => {
